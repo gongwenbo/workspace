@@ -10,7 +10,7 @@
 
 
 typedef struct {
-    ngx_str_t ed;
+	ngx_str_t ed;
 } ngx_http_echo_loc_conf_t;
 
 
@@ -92,10 +92,58 @@ ngx_http_echo(ngx_conf *cf, ngx_command_t *cmd, void *conf)
     return NGX_CON_OK;
 }
 
-static ngx_int_t
+static ngx_int_t 
 ngx_http_echo_handler(ngx_http_request_t *r)
 {
+	ngx_int_t rc;
+    ngx_buf_t *b;
+    ngx_chain_t out;
+    ngx_http_echo_loc_conf_t *elcf;
 
+	/* get the module conf */
+    elcf = ngx_http_get_module_loc_conf(r, ngx_http_echo_module);
+	
+	/* we response to 'GET' and 'HEAD' requests only*/
+	if ((r->method & (NGX_HTTP_HEAD|NGX_HTTP_GET))) {
+		return NGX_HTTP_NOT_ALLOWED;	
+	}
+	
+	/* discard request body, since we don't need it here */
+    ngx_str_set(&r->headers_out.content_type, "text/html");
+	if (r->method == NGX_HTTP_HEAD) {
+		r->headers_out->status = NGX_HTTP_OK;
+		r->headers_out->content_length_n = elcf->ed.len;
+		
+		return ngx_http_send_header(r);
+	}
+
+	/* allocate a buffer for the response body*/
+    b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
+    if (b == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+	
+	/* attach this buffer to the buffer chain */
+    out.buf = b;
+    out.next = NULL
+		
+	/* adjust the pointers of the buffer */
+    b.pos = elcf->ed.data;
+    b.last = elcf->ed.data + (elcf->ed.len);
+	b->memory = 1;      /* this buffer is in memory */
+	b->last_buf = 1;    /* this is the last buffer in the buffer chain*/
+	
+	/* set the status line*/
+	r->headers_out.status = NGX_HTTP_OK;
+	r->headers_out.content_length_n = elcf->ed.len;
+	
+	/* send the headers of the response */
+	rc = ngx_http_send_headers(r);
+	
+	if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+		return rc;
+	}
+	
+	/* send the buffer chain of the response */
+	return ngx_http_output_filter(r, &out);
 }
-
-
