@@ -87,6 +87,7 @@ ngx_http_echo_handler(ngx_http_request_t *r)
 	ngx_int_t rc;
 	ngx_buf_t *b;
 	ngx_chain_t out;
+	ngx_unit_t content_length = 0;
 	ngx_http_echo_loc_conf_t *elcf;
 	
 	/* get the module conf */
@@ -105,11 +106,12 @@ ngx_http_echo_handler(ngx_http_request_t *r)
 	
 	/* set the 'Content-type' header */
 	ngx_str_set(&r->headers_out.content_type, "text/html");
+	content_length = ngx_strlen(elcf->ed);
 	
 	/* send the header only, if the request type is http 'HEAD' */
 	if (r->method == NGX_HTTP_HEAD) {
 		r->headers_out.status = NGX_HTTP_OK;	
-		r->headers_out.content_length_n = elcf->ed.len;
+		r->headers_out.content_length_n = content_length;
 		
 		return ngx_http_send_header(r);
 	}
@@ -126,13 +128,13 @@ ngx_http_echo_handler(ngx_http_request_t *r)
 
 	/* adjust the pointers of the buffer */
 	b->pos = elcf->ed.data;
-	b->last = elcf->ed.data + (elcf->ed.len);
+	b->last = elcf->ed.data + content_length;
 	b->memory = 1;
 	b->last_buf = 1;
 	
 	/* set the status line */
 	r->headers_out.status = NGX_HTTP_OK;
-	r->headers_out.content_length_n = elcf->ed.len;
+	r->headers_out.content_length_n = content_length;
 	
 	/* send the headers of the response */
 	rc = ngx_http_send_header(r);
