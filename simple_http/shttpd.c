@@ -93,8 +93,8 @@ EXITshttpd_listen:
 
 int l_main()
 {
-	int ss = -1;
-	ss = do_listen();
+	//int ss = -1;
+	//ss = do_listen();
 	return 0;
 }
 int main(int argc, char *argv[])

@@ -88,7 +88,7 @@ int GenerateErrorMine(struct worker_ctl * wctl)
 		sizeof(wctl->conn.dres),
 		"HTTP/%lu.%lu %d %s\r\n"
 		"Content-Type:%s\r\n"
-		"Content-Length:%d\r\n"
+		"Content-Length:%zu\r\n"
 		"\r\n"
 		"%s",
 		wctl->conn.con_req.major,

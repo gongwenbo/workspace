@@ -67,7 +67,7 @@ static int Method_DoGet(struct worker_ctl *wctl)
 		n = sscanf(req->ch.range.v_vec.ptr,"bytes=%lu-%lu",&r1, &r2);
 	}
 
-	printf("n:%d\n",n);
+	printf("n:%zu\n",n);
 	if(n   > 0) 
 	{
 		status = 206;
@@ -86,15 +86,16 @@ static int Method_DoGet(struct worker_ctl *wctl)
 	snprintf(
 		res->res.ptr,
 		sizeof(wctl->conn.dres),
-		"HTTP/1.1 %d %s\r\n" 
+		"HTTP/1.1 %zu %s\r\n" 
 		"Date: %s\r\n"
 		"Last-Modified: %s\r\n"
 		"Etag: \"%s\"\r\n"
-		"Content-Type: %.*s\r\n"
-		"Content-Length: %lu\r\n"
+		"Content-Type: %zu\r\n"
+		"Content-Length: %s\r\n"
 		//"Connection:close\r\n"
-		"Accept-Ranges: bytes\r\n"		
+		"Accept-Ranges: %ld bytes\r\n"		
 		"%s\r\n",
+		//"%zu\r\n"
 		status,
 		msg,
 		date,

@@ -184,13 +184,13 @@ static int Worker_Add(int i)
 {
 	DBGPRINT("==>Worker_Add\n");
 	pthread_t th;
-	int err = -1;
+	int err=-1;
 	if( wctls[i].opts.flags == WORKER_RUNNING)
 		return 1;
 
 	pthread_mutex_lock(&thread_init);
 	wctls[i].opts.flags = WORKER_INITED;/*状态为已初始化*/
-	err = pthread_create(&th, NULL, worker, (void*)&wctls[i]);/*建立线程*/
+	err=pthread_create(&th, NULL, worker, (void*)&wctls[i]);/*建立线程*/
 	
 	pthread_mutex_lock(&thread_init);
 	pthread_mutex_unlock(&thread_init);
